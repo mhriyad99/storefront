@@ -1,2 +1,0 @@
-# storefront
-For django practice
