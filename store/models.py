@@ -1,17 +1,24 @@
 from django.db import models
 
+class Promotion(models.Model):
+    description = models.TextField()
+    discount = models.FloatField()
+
 class Collection(models.Model):
     title=models.CharField(max_length=255)
+    featured_product=models.ForeignKey('Product', on_delete=models.SET_NULL, null=True, related_name='+')
 
 class Product(models.Model):
     title=models.CharField(max_length=255)
+    slug=models.SlugField(default='-')
     description=models.TextField()
     price=models.DecimalField(max_digits=6, decimal_places=2)
     inventory=models.IntegerField()
     last_update=models.DateTimeField(auto_now=True)
     collection=models.ForeignKey(Collection, on_delete=models.PROTECT)
+    promotions=models.ManyToManyField(Promotion)
 
-class Customer(models.Models):
+class Customer(models.Model):
     MEMBERSHIP_BRONZE='B'
     MEMBERSHIP_SILVER="S"
     MEMBERSHIP_GOLD='G'
@@ -19,15 +26,16 @@ class Customer(models.Models):
     MEMBERSHIP_CHOICES= [
         (MEMBERSHIP_BRONZE, "Bronze"),
         (MEMBERSHIP_SILVER, "Silver"),
-        (MEMBERSHIP_GOLD), "Gold"
+        (MEMBERSHIP_GOLD, "Gold"),
     ]
 
     first_name=models.CharField(max_length=50)
-    last_name=models.CharField(max_lenght=50)
+    last_name=models.CharField(max_length=50)
     email=models.EmailField(unique=True)
     phone=models.CharField(max_length=20)
     birthdate=models.DateField(null=True)
     membership=models.CharField(max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE)
+
 
 class Item(models.Model):
     product=models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -40,8 +48,8 @@ class Order(models.Model):
 
     PAYMENT_STATUS=[
         (PAYMENT_PENDING, 'Pending'),
-        (PAYMENT_COMPLETED, 'Completed')
-        (PAYMENT_FAILED)
+        (PAYMENT_COMPLETED, 'Completed'),
+        (PAYMENT_FAILED, 'Failed')
     ]
     placed_at=models.DateTimeField(auto_created=True)
     payment_status=models.CharField(max_length=1, choices=PAYMENT_STATUS)
@@ -50,13 +58,14 @@ class Order(models.Model):
 class OrderItem(models.Model):
     product=models.ForeignKey(Product, on_delete=models.PROTECT)
     order=models.ForeignKey(Order, on_delete=models.PROTECT)
-    quantiy=models.PositiveSmallIntegerField()
+    quantity=models.PositiveSmallIntegerField()
     unit_price=models.DecimalField(max_digits=6, decimal_places=2)
 
 
 class Address(models.Model):
     street=models.CharField(max_length=255)
     city=models.CharField(max_length=255)
+    zip=models.PositiveIntegerField(null=True)
     customer=models.ForeignKey(Customer, on_delete=models.CASCADE)
 
 class Cart(models.Model):
