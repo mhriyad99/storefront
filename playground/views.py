@@ -13,6 +13,6 @@ def say_hello(request):
     # )
 
     queryset = Customer.objects.annotate(
-        fullname=Concat('first_name', Value(' '), 'last_name')
+        orders_count=Count('order')
     )
     return render(request, 'hello.html', {'name': 'Riyad', 'result': list(queryset)})
