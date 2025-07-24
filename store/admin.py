@@ -4,6 +4,7 @@ from django.db.models.query import QuerySet
 from django.utils.html import format_html, urlencode
 from django.urls import reverse
 from store import models
+from tags.models import TaggedItem
 
 
 class InventoryFilter(admin.SimpleListFilter):
@@ -19,6 +20,8 @@ class InventoryFilter(admin.SimpleListFilter):
         if self.value() == '<10':
             return queryset.filter(inventory__lt=10)
 
+
+
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ['collection']
@@ -32,6 +35,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 10
     list_filter = ['collection', 'last_update', InventoryFilter]
     list_select_related=  ['collection']
+    search_fields = ['title']
 
     def collection_title(self, product):
         return product.collection.title
@@ -73,10 +77,20 @@ class CustomerAdmin(admin.ModelAdmin):
             orders_count=Count('order')
         )
 
+
+class OrderItemAdmin(admin.TabularInline):
+    autocomplete_fields = ['product']
+    model = models.OrderItem
+    min_num = 1
+    max_num = 10
+    extra = 0
+
+
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
     autocomplete_fields = ['customer']
     list_display = ['id', 'placed_at', 'customer']
+    inlines = [OrderItemAdmin]
     list_per_page = 10
     ordering = ['placed_at']
 
