@@ -2,14 +2,12 @@ from decimal import Decimal
 from rest_framework import serializers
 from store.models import Product, Collection
 
-class CollectionSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    title = serializers.CharField(max_length=255)
-
-class ProductSerializer(serializers.ModelSerializer):
+class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
-        fields = ['id', 'title', 'unit_price', 'collection']
+        model = Collection
+        fields = ['id', 'title']
+
+class ProductSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     title = serializers.CharField(max_length=255)
     price = serializers.DecimalField(max_digits=5, decimal_places=2, source='unit_price')

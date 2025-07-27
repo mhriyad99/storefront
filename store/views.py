@@ -12,11 +12,16 @@ def product_list(request):
     serializer = ProductSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
 
-@api_view()
+@api_view(['GET', 'POST'])
 def product_detail(request, id):
-    product = get_object_or_404(Product, pk=id)
-    serializer = ProductSerializer(product)
-    return Response(serializer.data)
+    if request.method == 'GET':
+        product = get_object_or_404(Product, pk=id)
+        serialize = ProductSerializer(product, context={'request': request})
+        return Response(serialize.data)
+    
+    elif request.method == 'POST':
+        serialize = ProductSerializer(data=request.data)
+        return Response('ok')
 
 @api_view()
 def collection_detail(request, pk):
