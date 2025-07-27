@@ -1,2 +1,4 @@
 django
 mysqlclient
+djangorestframework
+django-debug-tool
