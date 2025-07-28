@@ -6,23 +6,38 @@ from rest_framework import status
 from store.models import Product
 from store.serializers import ProductSerializer
 
-@api_view()
-def product_list(request):
-    queryset = Product.objects.select_related('collection').all()
-    serializer = ProductSerializer(queryset, many=True, context={'request': request})
-    return Response(serializer.data)
-
 @api_view(['GET', 'POST'])
-def product_detail(request, id):
+def product_list(request):
     if request.method == 'GET':
-        product = get_object_or_404(Product, pk=id)
+        queryset = Product.objects.select_related('collection').all()
+        serializer = ProductSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serialize = ProductSerializer(data=request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.save()
+        return Response(serialize.data, status=status.HTTP_201_CREATED)
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def product_detail(request, id):
+    product = get_object_or_404(Product, pk=id)
+    if request.method == 'GET':
         serialize = ProductSerializer(product, context={'request': request})
         return Response(serialize.data)
     
-    elif request.method == 'POST':
-        serialize = ProductSerializer(data=request.data)
-        return Response('ok')
-
+    elif request.method == 'PUT':
+        serialize = ProductSerializer(product, data=request.data)
+        serialize.is_valid(raise_exception=True)
+        serialize.save()
+        return Response(serialize.data)
+    
+    elif request.method == 'DELETE':
+        if product.oderitem_set.count() > 0:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+        
 @api_view()
 def collection_detail(request, pk):
     return Response('ok')
