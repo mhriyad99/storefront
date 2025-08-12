@@ -2,3 +2,5 @@ django
 mysqlclient
 djangorestframework
 django-debug-tool
+drf-nested-routers
+django-filter
