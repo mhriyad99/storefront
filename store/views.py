@@ -5,12 +5,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from django_filters.rest_framework import DjangoFilterBackend 
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, UpdateAPIView
 from django.db.models.aggregates import Count
-from store.models import Product, Collection, OrderItem, Review
-from store.serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
+from store.models import Product, Collection, OrderItem, Review, Cart, CartItem
+from store.serializers import ProductSerializer, CollectionSerializer, ReviewSerializer, CartSerializer
 from store.filters import ProductFilter
 from store.pagination import DefaultPagination
 
@@ -78,3 +79,9 @@ def collection_detail(request, pk):
             return Response({'error': 'This collection cannot be deleted because it includes one or more products!'},status=status.HTTP_405_METHOD_NOT_ALLOWED)
         collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class CartViewSet(CreateModelMixin,
+                  RetrieveModelMixin, 
+                  GenericViewSet):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
